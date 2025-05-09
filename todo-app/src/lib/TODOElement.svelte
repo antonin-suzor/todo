@@ -1,11 +1,15 @@
 <script lang="ts">
     import type { TODOElementData } from '$lib/types.ts';
 
-    let { title, done, description }: TODOElementData = $props();
+    let { data, updateElementData }: { data: TODOElementData, updateElementData: (elementData: TODOElementData) => void } = $props();
+
+    function changeDone() {
+        updateElementData({...data, done: !data.done});
+    }
 </script>
 
-<div>
-    <p>{title}</p>
-    <label><input type="checkbox" checked={done}>Done ?</label>
-    <p>{description}</p>
+<div style="border: solid 1px grey">
+    <p>{data.title}</p>
+    <label><input type="checkbox" checked={data.done} onchange={changeDone}>Done ?</label>
+    <p>{data.description}</p>
 </div>
