@@ -38,9 +38,6 @@
     }
 </script>
 
-<h1>TODO app</h1>
-<a href="/">Go to the home page</a>
-
 <h3>Add</h3>
 <form onsubmit={addElement}>
     <label>Title: <input type="text" bind:value={addTitle}></label>
