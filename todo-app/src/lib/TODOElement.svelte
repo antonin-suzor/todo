@@ -1,5 +1,7 @@
 <script lang="ts">
-    let {title, done = false, description}: { title: string, done?: boolean, description: string } = $props();
+    import type { TODOElementData } from '$lib/types.ts';
+
+    let { title, done, description }: TODOElementData = $props();
 </script>
 
 <div>
