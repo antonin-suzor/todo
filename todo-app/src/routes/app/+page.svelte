@@ -1,21 +1,10 @@
 <script lang="ts">
     import type { TODOElementData } from '$lib/types.ts';
+    import type { appPageServerProps } from './+page.server.ts';
     import TODOElement from '$lib/TODOElement.svelte'
 
-    let elements: TODOElementData[] = $state([
-        {
-            id: 1,
-            title: "TODO element",
-            done: false,
-            description: "Element description"
-        },
-        {
-            id: 2,
-            title: "DONE element",
-            done: true,
-            description: "Element description"
-        }
-    ]);
+    let { data }: { data: appPageServerProps } = $props();
+    let elements: TODOElementData[] = $state(data.elementsData);
 
     let addTitle = $state('');
     let addDone = $state(false);
