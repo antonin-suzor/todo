@@ -15,6 +15,7 @@
             title: addTitle,
             done: addDone,
             description: addDescription,
+            accountId: 0,
         });
         addTitle = '';
         addDone = false;
