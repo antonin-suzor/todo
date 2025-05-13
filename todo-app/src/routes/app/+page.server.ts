@@ -1,7 +1,8 @@
 import { elementsData } from '$lib/data.ts';
 
-export function load() {
+export async function load({ parent }) {
+    const { user } = await parent();
     return {
-        elementsData: elementsData,
+        elementsData: user ? elementsData.filter(e => e.accountId === user.id) : elementsData,
     }
 }
