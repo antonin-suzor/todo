@@ -4,18 +4,28 @@
 
     let { data } = $props();
     let elements: TODOElementData[] = $state(data.elementsData);
+    let userId = data.user?.id ?? 0;
 
     let addTitle = $state('');
     let addDone = $state(false);
     let addDescription = $state('');
-    function addElement() {
-        elements.push({
+    async function addElement() {
+        let newTodo: TODOElementData = {
             id: Date.now(),
             title: addTitle,
             done: addDone,
             description: addDescription,
-            accountId: 0,
+            accountId: userId,
+        };
+        let res = await fetch('/api/todos', {
+            method: 'POST',
+            body: JSON.stringify(newTodo),
+            headers: {
+                'Content-Type': 'application/json',
+            }
         });
+        newTodo = await res.json();
+        elements.push(newTodo);
         addTitle = '';
         addDone = false;
         addDescription = '';
@@ -25,6 +35,7 @@
         let i = elements.findIndex(e => e.id === elementData.id);
         elements[i] = elementData;
     }
+    $inspect(elements);
 </script>
 
 <h3>Add</h3>

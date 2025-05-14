@@ -12,6 +12,18 @@ export function elementsData(userId?: number) {
     ;`;
 }
 
+export async function elementsDataNew(newTodo: TODOElementData) {
+    let res: {id: number}[] = await sql`
+        INSERT INTO todo_element_data
+            ${sql({ ...newTodo, account_id: newTodo.accountId },
+                    'title', 'done', 'description', 'account_id')
+            }
+            RETURNING id
+        ;`;
+    let id = res[0].id
+    return { ...newTodo, id }
+}
+
 export function usersData() {
     return sql<UserData[]>`SELECT id, name FROM account;`;
 }

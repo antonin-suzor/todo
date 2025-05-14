@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS "account"
 );
 
 INSERT INTO "account" (id, name)
-VALUES (1, 'user ABC'),
+VALUES (0, 'public user'),
+       (1, 'user ABC'),
        (2, 'user DEF');
 
 CREATE TABLE IF NOT EXISTS "todo_element_data"
@@ -18,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "todo_element_data"
     "title"       TEXT    NOT NULL,
     "done"        BOOLEAN NOT NULL DEFAULT FALSE,
     "description" TEXT    NOT NULL DEFAULT '',
-    "account_id"  INTEGER NOT NULL REFERENCES "account" (id) ON DELETE CASCADE
+    "account_id"  INTEGER REFERENCES "account" (id) ON DELETE CASCADE
 );
 
 INSERT INTO "todo_element_data" (title, done, description, account_id)
