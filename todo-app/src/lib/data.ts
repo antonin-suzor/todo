@@ -1,43 +1,17 @@
 import type { TODOElementData, UserData } from '$lib/types.ts';
+import sql from '$lib/db.ts';
 
-export const elementsData: TODOElementData[] = [
-    {
-        id: 11,
-        title: 'TODO element for user 1',
-        done: false,
-        description: 'Element description',
-        accountId: 1,
-    },
-    {
-        id: 12,
-        title: 'DONE element for user ABC',
-        done: true,
-        description: 'Element description',
-        accountId: 1,
-    },
-    {
-        id: 21,
-        title: 'TODO element for user 2',
-        done: false,
-        description: 'Element description',
-        accountId: 2,
-    },
-    {
-        id: 22,
-        title: 'DONE element for user DEF',
-        done: true,
-        description: 'Element description',
-        accountId: 2,
-    },
-];
+export function elementsData(userId?: number) {
+    return sql<TODOElementData[]>`
+        SELECT id, title, done, description, account_id as "accountId"
+        FROM todo_element_data ${
+        userId 
+                ? sql`WHERE account_id = ${userId};`
+                : sql``
+        }
+    ;`;
+}
 
-export const usersData: UserData[] = [
-    {
-        id: 1,
-        name: 'user ABC',
-    },
-    {
-        id: 1,
-        name: 'user DEF',
-    },
-];
+export function usersData() {
+    return sql<UserData[]>`SELECT id, name FROM account;`;
+}

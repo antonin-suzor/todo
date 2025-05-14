@@ -1,6 +1,6 @@
 import { usersData } from '$lib/data.ts';
 
-export function load({ cookies }) {
+export async function load({ cookies }) {
     let userIdCookie = cookies.get('userId');
     if (!userIdCookie) {
         return {
@@ -9,7 +9,7 @@ export function load({ cookies }) {
     }
 
     let userId = parseInt(userIdCookie);
-    let user = usersData.find((user) => user.id === userId)
+    let user = (await usersData()).find((user) => user.id === userId)
     return {
         user: user ?? null,
     }
