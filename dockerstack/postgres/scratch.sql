@@ -9,8 +9,7 @@ CREATE TABLE IF NOT EXISTS "account"
 );
 
 INSERT INTO "account" (id, name)
-VALUES (0, 'public user'),
-       (1, 'user ABC'),
+VALUES (1, 'user ABC'),
        (2, 'user DEF');
 
 CREATE TABLE IF NOT EXISTS "todo_element_data"

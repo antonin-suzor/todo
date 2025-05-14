@@ -4,31 +4,35 @@
 
     let { data } = $props();
     let elements: TODOElementData[] = $state(data.elementsData);
-    let userId = data.user?.id ?? 0;
 
     let addTitle = $state('');
     let addDone = $state(false);
     let addDescription = $state('');
     async function addElement() {
-        let newTodo: TODOElementData = {
-            id: Date.now(),
-            title: addTitle,
-            done: addDone,
-            description: addDescription,
-            accountId: userId,
-        };
-        let res = await fetch('/api/todos', {
-            method: 'POST',
-            body: JSON.stringify(newTodo),
-            headers: {
-                'Content-Type': 'application/json',
+        try {
+            let res = await fetch('/api/todos', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: addTitle,
+                    done: addDone,
+                    description: addDescription,
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            if (!res.ok) {
+                throw new Error(res.statusText);
             }
-        });
-        newTodo = await res.json();
-        elements.push(newTodo);
-        addTitle = '';
-        addDone = false;
-        addDescription = '';
+            let newTodo: TODOElementData = await res.json();
+            elements.push(newTodo);
+            addTitle = '';
+            addDone = false;
+            addDescription = '';
+        } catch (e) {
+            console.error(e);
+            alert('Something went wrong when sending new TODO to the server.');
+        }
     }
 
     function updateElementData(elementData: TODOElementData) {

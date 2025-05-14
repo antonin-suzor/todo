@@ -3,10 +3,16 @@ export interface TODOElementData {
     title: string,
     done: boolean,
     description: string,
-    accountId: number,
+    accountId: number | null,
 }
 
 export interface UserData {
     id: number,
     name: string,
+}
+
+export interface NewTodoRequest {
+    title: string,
+    done: boolean,
+    description: string,
 }

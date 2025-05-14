@@ -9,8 +9,8 @@ export async function load({ cookies }) {
     }
 
     let userId = parseInt(userIdCookie);
-    let user = (await usersData()).find((user) => user.id === userId)
+    let users = await usersData(userId);
     return {
-        user: user ?? null,
+        user: users.length > 0 ? users[0] : null,
     }
 }

@@ -1,19 +1,15 @@
 import { json } from '@sveltejs/kit';
 
-import type { TODOElementData } from '$lib/types.ts';
+import type { NewTodoRequest } from '$lib/types.ts';
 import { elementsDataNew } from '$lib/data.ts';
 
 export async function POST({ cookies, request }) {
-    let userIdCookie = cookies.get('userId') ?? '0';
-    let userId = parseInt(userIdCookie);
+    let userIdCookie = cookies.get('userId') ?? 'NaN';
+    let userId: number | undefined = parseInt(userIdCookie);
     if (Number.isNaN(userId)) {
-        userId = 0;
+        userId = undefined;
     }
 
-    let newTodo: TODOElementData = await request.json();
-    if (newTodo.accountId != userId) {
-        return json({ message: 'user cookie and element account do not match' }, { status: 400 })
-    }
-
-    return json(await elementsDataNew(newTodo));
+    let newTodo: NewTodoRequest = await request.json();
+    return json(await elementsDataNew(newTodo, userId));
 }
