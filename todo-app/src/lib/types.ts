@@ -11,7 +11,7 @@ export interface UserData {
     name: string,
 }
 
-export interface NewTodoRequest {
+export interface TODOElementDataRequest {
     title: string,
     done: boolean,
     description: string,

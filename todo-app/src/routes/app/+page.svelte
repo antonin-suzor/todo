@@ -35,11 +35,42 @@
         }
     }
 
-    function updateElementData(elementData: TODOElementData) {
-        let i = elements.findIndex(e => e.id === elementData.id);
-        elements[i] = elementData;
+    async function updateElementData(elementData: TODOElementData) {
+        try {
+            // do not await yet, simply send the request
+            let resPromise = fetch(`/api/todos/${elementData.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify(elementData),
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            // then, iterate through the array
+            let i = elements.findIndex(e => e.id === elementData.id);
+            // then, you may await
+            let res = await resPromise;
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            }
+            elements[i] = await res.json();
+        } catch (e) {
+            console.error(e);
+            alert('Something went wrong when modifying the TODO on the server.');
+        }
     }
-    $inspect(elements);
+
+    async function deleteElement(elementData: TODOElementData) {
+        try {
+            let res = await fetch(`/api/todos/${elementData.id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            }
+            elements = elements.filter(e => e.id !== elementData.id)
+        } catch (e) {
+            console.error(e);
+            alert('Something went wrong when modifying the TODO on the server.');
+        }
+    }
 </script>
 
 <h3>Add</h3>
@@ -52,10 +83,10 @@
 
 <h3>TODO</h3>
 {#each elements.filter(e => !e.done) as elem (elem.id)}
-    <TODOElement data={elem} updateElementData={updateElementData} />
+    <TODOElement data={elem} updateElementData={updateElementData} deleteElement={deleteElement} />
 {/each}
 
 <h3>DONE</h3>
 {#each elements.filter(e => e.done) as elem (elem.id)}
-    <TODOElement data={elem} updateElementData={updateElementData} />
+    <TODOElement data={elem} updateElementData={updateElementData} deleteElement={deleteElement} />
 {/each}

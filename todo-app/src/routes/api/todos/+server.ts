@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 
-import type { NewTodoRequest } from '$lib/types.ts';
+import type { TODOElementDataRequest } from '$lib/types.ts';
 import { elementsDataNew } from '$lib/data.ts';
 
 export async function POST({ cookies, request }) {
@@ -10,6 +10,6 @@ export async function POST({ cookies, request }) {
         userId = undefined;
     }
 
-    let newTodo: NewTodoRequest = await request.json();
+    let newTodo: TODOElementDataRequest = await request.json();
     return json(await elementsDataNew(newTodo, userId));
 }
