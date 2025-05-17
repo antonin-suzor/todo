@@ -56,7 +56,9 @@
         } catch (e) {
             console.error(e);
             alert('Something went wrong when modifying the TODO on the server.');
+            return false;
         }
+        return true;
     }
 
     async function deleteElement(elementData: TODOElementData) {
