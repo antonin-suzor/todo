@@ -4,11 +4,7 @@ import sql from '$lib/db.ts';
 export async function elementsData(userId?: number): Promise<TODOElementData[]> {
     return sql<TODOElementData[]>`
         SELECT id, title, done, description, account_id as "accountId"
-        FROM todo_element_data ${
-        userId 
-                ? sql`WHERE account_id = ${userId}`
-                : sql``
-        }`
+        FROM todo_element_data ${userId ? sql`WHERE account_id = ${userId}` : sql`WHERE account_id IS NULL`}`
 }
 
 export async function elementsDataNew(newTodo: TODOElementDataRequest, userId?: number): Promise<TODOElementData> {
@@ -27,7 +23,7 @@ export async function elementsDataModify(todoId: number, modTodo: TODOElementDat
         UPDATE todo_element_data SET ${
         sql({ ...modTodo, account_id: userId ?? null },
                 'title', 'done', 'description', 'account_id')
-        } WHERE id = ${todoId} AND account_id = ${userId ?? null}
+        } WHERE id = ${todoId} ${userId ? sql`AND account_id = ${userId}` : sql`AND account_id IS NULL`}
         RETURNING id`
 
     if (res.length === 0) {
@@ -39,7 +35,9 @@ export async function elementsDataModify(todoId: number, modTodo: TODOElementDat
 
 export async function elementsDataDelete(todoId: number, userId?: number): Promise<boolean> {
     let res: {id: number}[] = await sql`
-        DELETE FROM todo_element_data WHERE id = ${todoId} AND account_id = ${userId ?? null} RETURNING id`
+        DELETE FROM todo_element_data
+        WHERE id = ${todoId} ${userId ? sql`AND account_id = ${userId}` : sql`AND account_id IS NULL`}
+        RETURNING id`
     return res.length > 0;
 }
 
