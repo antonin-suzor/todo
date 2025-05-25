@@ -1,0 +1,33 @@
+services:
+  postgres:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    container_name: todo-postgres
+    restart: on-failure
+    environment:
+      POSTGRES_INITDB_ARGS: --auth=scram-sha-256
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_DB: root_db
+      POSTGRES_USER: root_usr
+      POSTGRES_PASSWORD: root_pwd
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 3s
+      timeout: 10s
+      retries: 5
+
+  sveltekit:
+    profiles:
+      - prod
+    build:
+      context: ../todo-app
+      dockerfile: ../dockerstack/sveltekit/Dockerfile
+    container_name: todo-sveltekit
+    restart: on-failure
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
