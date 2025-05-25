@@ -30,3 +30,13 @@ services:
       - postgres
     ports:
       - "3000:3000"
+
+  actix:
+    profiles:
+      - prod
+    build:
+      context: actix-backend
+    container_name: todo-actix
+    restart: on-failure
+    ports:
+      - "8080:8080"
