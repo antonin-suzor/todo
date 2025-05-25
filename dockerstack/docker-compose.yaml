@@ -18,3 +18,16 @@ services:
       interval: 3s
       timeout: 10s
       retries: 5
+
+  sveltekit:
+    profiles:
+      - prod
+    build:
+      context: ../todo-app
+      dockerfile: ../dockerstack/sveltekit/Dockerfile
+    container_name: todo-sveltekit
+    restart: on-failure
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
