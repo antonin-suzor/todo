@@ -23,8 +23,7 @@ services:
     profiles:
       - prod
     build:
-      context: ../todo-app
-      dockerfile: ../dockerstack/sveltekit/Dockerfile
+      context: ./sveltekit-ui
     container_name: todo-sveltekit
     restart: on-failure
     depends_on:
