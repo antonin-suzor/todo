@@ -31,12 +31,12 @@ async fn main() -> std::io::Result<()> {
     });
     HttpServer::new(move || {
         let cors = Cors::permissive();
-        App::new()
+        App::new().service(web::scope("/rust")
             .wrap(cors)
             .app_data(app_state.clone())
             .service(count)
             .service(echo)
-            .route("/", web::get().to(async || { "This is the Rust Actix backend." }))
+            .route("", web::get().to(async || { "This is the Rust Actix backend." })))
     })
         .bind(("0.0.0.0", 8080))?
         .run()
