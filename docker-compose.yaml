@@ -28,8 +28,6 @@ services:
     restart: on-failure
     depends_on:
       - postgres
-    ports:
-      - "3000:3000"
 
   actix:
     profiles:
@@ -38,5 +36,26 @@ services:
       context: actix-backend
     container_name: todo-actix
     restart: on-failure
+
+  nginx-prod:
+    profiles:
+      - prod
+    build:
+      context: nginx/prod
+    container_name: todo-nginx-prod
+    restart: on-failure
+    depends_on:
+      - sveltekit
+      - actix
     ports:
-      - "8080:8080"
+      - "649:649"
+
+  nginx-dev:
+    profiles:
+      - dev
+    build:
+      context: nginx/dev
+    container_name: todo-nginx-dev
+    restart: on-failure
+    ports:
+      - "649:649"

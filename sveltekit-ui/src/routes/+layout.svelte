@@ -21,6 +21,7 @@
         <li><button onclick={() => logInAsUserId(2)}>User 2, DEF</button></li>
         <li><button onclick={() => logInAsUserId(0)}>Log out</button></li>
     </ul>
+    <p>We are currently in <strong>{import.meta.env.VITE_OUR_ENV}</strong>-like environment.</p>
 </nav>
 
 {@render children()}

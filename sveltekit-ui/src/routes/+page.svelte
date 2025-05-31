@@ -4,13 +4,13 @@
     let actixCount: number | undefined = $state();
     let actixMessage: string | undefined = $state();
     onMount(async () => {
-        let res = await fetch('http://localhost:8080/rust/count');
+        let res = await fetch(`${import.meta.env.VITE_ACTIX_HOST}/rust/count`);
         actixCount = (await res.json()).count;
         if (!res.ok) {
             console.error(res.statusText);
         }
 
-        res = await fetch('http://localhost:8080/rust');
+        res = await fetch(`${import.meta.env.VITE_ACTIX_HOST}/rust`);
         if (!res.ok) {
             console.error(res.statusText);
         }
