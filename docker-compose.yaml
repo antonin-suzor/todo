@@ -23,11 +23,39 @@ services:
     profiles:
       - prod
     build:
-      context: ../todo-app
-      dockerfile: ../dockerstack/sveltekit/Dockerfile
+      context: ./sveltekit-ui
     container_name: todo-sveltekit
     restart: on-failure
     depends_on:
       - postgres
+
+  actix:
+    profiles:
+      - prod
+    build:
+      context: actix-backend
+    container_name: todo-actix
+    restart: on-failure
+
+  nginx-prod:
+    profiles:
+      - prod
+    build:
+      context: nginx/prod
+    container_name: todo-nginx-prod
+    restart: on-failure
+    depends_on:
+      - sveltekit
+      - actix
     ports:
-      - "3000:3000"
+      - "649:649"
+
+  nginx-dev:
+    profiles:
+      - dev
+    build:
+      context: nginx/dev
+    container_name: todo-nginx-dev
+    restart: on-failure
+    ports:
+      - "649:649"
