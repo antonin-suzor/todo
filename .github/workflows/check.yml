@@ -41,6 +41,7 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
+          cache-dependency-path: sveltekit-ui/package-lock.json
       - name: Install
         run: npm ci
       - name: Build
