@@ -1,0 +1,50 @@
+name: Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  rust:
+    name: Check Rust Actix backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./actix-backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Compile
+        run: cargo build
+      - name: Test
+        run: cargo test
+
+  node:
+    name: Check NodeJS Sveltekit UI
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./sveltekit-ui
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: sveltekit-ui/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Test
+        run: npm run check
