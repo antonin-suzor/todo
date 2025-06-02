@@ -23,9 +23,9 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - name: Compile
-        run: cargo build --verbose
+        run: cargo build
       - name: Test
-        run: cargo test --verbose
+        run: cargo test
 
   node:
     name: Check NodeJS Sveltekit UI
@@ -47,4 +47,4 @@ jobs:
       - name: Build
         run: npm run build
       - name: Test
-        run: npm run test
+        run: npm run check
