@@ -1,9 +1,12 @@
 use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use actix_cors::Cors;
 use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
+use actix_web::middleware::Logger;
 use actix_web::web::{get, scope, Data, Json, ThinData};
 use serde::Serialize;
 use sqlx::{PgPool, Row};
+
+pub mod todos;
 
 struct AppStateCounter {
     count: RwLock<u64>,
@@ -57,16 +60,21 @@ async fn get_users(ThinData(db_pool): ThinData<PgPool>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    unsafe { std::env::set_var("RUST_LOG", "debug"); }
+    env_logger::init();
     let app_state: Data<AppStateCounter> = Data::new(AppStateCounter {
         count: RwLock::new(0),
     });
     let db_pool= PgPool::connect("postgres://root_usr:root_pwd@localhost:5432/root_db").await.expect("Connection to database should not fail");
     HttpServer::new(move || {
         let cors = Cors::permissive();
-        App::new().service(scope("/rust")
+        App::new()
+            .wrap(Logger::default())
+            .service(scope("/rust")
             .wrap(cors)
             .app_data(app_state.clone())
             .app_data(ThinData(db_pool.clone()))
+            .service(todos::post_api_todos)
             .service(get_count)
             .service(get_count_ghost)
             .service(post_echo)
