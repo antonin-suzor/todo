@@ -1,18 +1,20 @@
-use actix_web::{get, HttpRequest, HttpResponse};
 use actix_web::cookie::Cookie;
 use actix_web::http::header;
 use actix_web::web::Path;
+use actix_web::{HttpRequest, HttpResponse, get};
 
 #[get("/api/fake-auth/as/{id}")]
 async fn fake_auth(req: HttpRequest, path_params: Path<i32>) -> HttpResponse {
     let id: i32 = path_params.into_inner();
-    let host = req.headers().get(header::HOST).expect("Header Host should be available").to_str().expect("Host should be a string");
+    let host = req
+        .headers()
+        .get(header::HOST)
+        .expect("Header Host should be available")
+        .to_str()
+        .expect("Host should be a string");
 
     let cookie: Cookie = if id <= 0 {
-        let mut c = Cookie::build("userId", "")
-            .domain(host)
-            .path("/")
-            .finish();
+        let mut c = Cookie::build("userId", "").domain(host).path("/").finish();
         c.make_removal();
         c
     } else {
@@ -24,5 +26,5 @@ async fn fake_auth(req: HttpRequest, path_params: Path<i32>) -> HttpResponse {
             .finish()
     };
 
-    return HttpResponse::Ok().cookie(cookie).finish();
+    HttpResponse::Ok().cookie(cookie).finish()
 }

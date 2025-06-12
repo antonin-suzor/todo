@@ -1,8 +1,7 @@
-use actix_web::{delete, patch, post, HttpRequest, HttpResponse};
 use actix_web::web::{Json, Path, ThinData};
+use actix_web::{HttpRequest, HttpResponse, delete, patch, post};
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, PgPool, Row};
-
 
 #[derive(Deserialize, FromRow, Serialize)]
 struct TODOElementData {
@@ -52,12 +51,13 @@ impl From<TODOElementData> for TODOElementDataRequest {
 }
 
 #[post("/api/todos")]
-pub async fn post_api_todos(req: HttpRequest, todo: Json<TODOElementDataRequest>, ThinData(db_pool): ThinData<PgPool>) -> HttpResponse {
+pub async fn post_api_todos(
+    req: HttpRequest,
+    todo: Json<TODOElementDataRequest>,
+    ThinData(db_pool): ThinData<PgPool>,
+) -> HttpResponse {
     let user_id_from_cookie: Option<i32> = match req.cookie("userId") {
-        Some(cookie) => match cookie.value().parse() {
-            Ok(user_id) => Some(user_id),
-            Err(_) => None,
-        }
+        Some(cookie) => cookie.value().parse().ok(),
         None => None,
     };
 
@@ -71,17 +71,26 @@ pub async fn post_api_todos(req: HttpRequest, todo: Json<TODOElementDataRequest>
         return HttpResponse::InternalServerError().finish();
     }
 
-    return HttpResponse::Ok()
-        .json(TODOElementData::new(q.unwrap().get("id"), todo.into_inner(), user_id_from_cookie));
+    HttpResponse::Ok().json(TODOElementData::new(
+        q.unwrap().get("id"),
+        todo.into_inner(),
+        user_id_from_cookie,
+    ))
 }
 
 #[patch("/api/todos/{id}")]
-pub async fn patch_api_todos_id(req: HttpRequest, path_params: Path<i32>, mod_todo: Json<TODOElementDataRequest>, ThinData(db_pool): ThinData<PgPool>) -> HttpResponse {
+pub async fn patch_api_todos_id(
+    req: HttpRequest,
+    path_params: Path<i32>,
+    mod_todo: Json<TODOElementDataRequest>,
+    ThinData(db_pool): ThinData<PgPool>,
+) -> HttpResponse {
     let todo_id: i32 = path_params.into_inner();
 
     let q = sqlx::query_as::<_, TODOElementData>("SELECT * FROM todo_element_data WHERE id = $1;")
         .bind(todo_id)
-        .fetch_one(&db_pool).await;
+        .fetch_one(&db_pool)
+        .await;
     if q.is_err() {
         return HttpResponse::InternalServerError().finish();
     }
@@ -90,10 +99,7 @@ pub async fn patch_api_todos_id(req: HttpRequest, path_params: Path<i32>, mod_to
     let todo_account_id: Option<i32> = todo.account_id;
     if todo_account_id.is_some() {
         let user_id_from_cookie: Option<i32> = match req.cookie("userId") {
-            Some(cookie) => match cookie.value().parse() {
-                Ok(user_id) => Some(user_id),
-                Err(_) => None,
-            }
+            Some(cookie) => cookie.value().parse().ok(),
             None => None,
         };
         if user_id_from_cookie != todo_account_id {
@@ -102,24 +108,33 @@ pub async fn patch_api_todos_id(req: HttpRequest, path_params: Path<i32>, mod_to
     }
 
     todo.receive(mod_todo.into_inner());
-    return match sqlx::query("UPDATE todo_element_data SET title = $1, done = $2, description = $3 WHERE id = $4;")
-        .bind(<String as AsRef<str>>::as_ref(&todo.title))
-        .bind(todo.done)
-        .bind(&todo.description)
-        .bind(todo_id)
-        .execute(&db_pool).await {
+    match sqlx::query(
+        "UPDATE todo_element_data SET title = $1, done = $2, description = $3 WHERE id = $4;",
+    )
+    .bind(&todo.title)
+    .bind(todo.done)
+    .bind(&todo.description)
+    .bind(todo_id)
+    .execute(&db_pool)
+    .await
+    {
         Ok(_) => HttpResponse::Ok().json(todo),
         Err(_) => HttpResponse::InternalServerError().finish(),
-    };
+    }
 }
 
 #[delete("/api/todos/{id}")]
-pub async fn delete_api_todos_id(req: HttpRequest, path_params: Path<i32>, ThinData(db_pool): ThinData<PgPool>) -> HttpResponse {
+pub async fn delete_api_todos_id(
+    req: HttpRequest,
+    path_params: Path<i32>,
+    ThinData(db_pool): ThinData<PgPool>,
+) -> HttpResponse {
     let todo_id: i32 = path_params.into_inner();
 
     let q = sqlx::query("SELECT account_id FROM todo_element_data WHERE id = $1;")
         .bind(todo_id)
-        .fetch_one(&db_pool).await;
+        .fetch_one(&db_pool)
+        .await;
     if q.is_err() {
         return HttpResponse::InternalServerError().finish();
     }
@@ -132,10 +147,7 @@ pub async fn delete_api_todos_id(req: HttpRequest, path_params: Path<i32>, ThinD
     let todo_account_id: Option<i32> = q.get("account_id");
     if todo_account_id.is_some() {
         let user_id_from_cookie: Option<i32> = match req.cookie("userId") {
-            Some(cookie) => match cookie.value().parse() {
-                Ok(user_id) => Some(user_id),
-                Err(_) => None,
-            }
+            Some(cookie) => cookie.value().parse().ok(),
             None => None,
         };
         if user_id_from_cookie != todo_account_id {
@@ -143,9 +155,11 @@ pub async fn delete_api_todos_id(req: HttpRequest, path_params: Path<i32>, ThinD
         }
     }
 
-    return match sqlx::query("DELETE FROM todo_element_data WHERE id = $1;")
-        .execute(&db_pool).await {
+    match sqlx::query("DELETE FROM todo_element_data WHERE id = $1;")
+        .execute(&db_pool)
+        .await
+    {
         Ok(_) => HttpResponse::NoContent().finish(),
         Err(_) => HttpResponse::InternalServerError().finish(),
-    };
+    }
 }
