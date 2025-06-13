@@ -1,44 +1,41 @@
-use std::sync::{Mutex, MutexGuard};
 use actix_cors::Cors;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
-use serde::Serialize;
+use actix_web::middleware::Logger;
+use actix_web::web::{Data, ThinData, get};
+use actix_web::{App, HttpServer};
+use sqlx::PgPool;
 
-struct AppState {
-    count: Mutex<u64>,
-}
-
-#[derive(Serialize)]
-struct CounterResponse {
-    count: u64,
-}
-
-#[get("/count")]
-async fn count(data: web::Data<AppState>) -> impl Responder {
-    let mut count: MutexGuard<u64> = data.count.lock().expect("AppState should be available");
-    *count += 1;
-    return web::Json(CounterResponse { count: *count });
-}
-
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    return HttpResponse::Ok().body(req_body)
-}
+mod auth;
+mod misc;
+mod todos;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let app_state: web::Data<AppState> = web::Data::new(AppState {
-        count: Mutex::new(0),
-    });
+    unsafe {
+        std::env::set_var("RUST_LOG", "debug");
+    }
+    env_logger::init();
+    let app_state: Data<misc::AppStateCounter> = Data::new(misc::AppStateCounter::new());
+    let db_pool = PgPool::connect("postgres://root_usr:root_pwd@localhost:5432/root_db")
+        .await
+        .expect("Connection to database should not fail");
     HttpServer::new(move || {
         let cors = Cors::permissive();
-        App::new().service(web::scope("/rust")
+        App::new()
+            .wrap(Logger::default())
             .wrap(cors)
             .app_data(app_state.clone())
-            .service(count)
-            .service(echo)
-            .route("", web::get().to(async || { "This is the Rust Actix backend." })))
+            .app_data(ThinData(db_pool.clone()))
+            .route("/api", get().to(async || "This is the Rust Actix backend."))
+            .service(auth::fake_auth)
+            .service(misc::get_count)
+            .service(misc::get_count_ghost)
+            .service(misc::post_echo)
+            .service(misc::get_users)
+            .service(todos::post_api_todos)
+            .service(todos::patch_api_todos_id)
+            .service(todos::delete_api_todos_id)
     })
-        .bind(("0.0.0.0", 8080))?
-        .run()
-        .await
+    .bind(("0.0.0.0", 8080))?
+    .run()
+    .await
 }
